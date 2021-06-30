@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const dns = require('dns');
 const url = require('url');
 const shortid = require('shortid');
+const validUrl = require('valid-url');
 
 const { Schema } = mongoose; 
 
@@ -39,7 +40,7 @@ app.get('/api/shorturl/:short_url', (req, res) => {
     if(data) {
       return res.redirect(data.original_url)
     } else {
-      res.status(404).json({ error: 'invalid url' })
+      res.status(404).json({ error: 'No URL found' })
     }
   });
 });
@@ -47,28 +48,26 @@ app.get('/api/shorturl/:short_url', (req, res) => {
 // Your first API endpoint
 app.post('/api/shorturl', function(req, res) {
   const original_url = req.body.url;
-  console.error(req.body)
-  dns.lookup(url.parse(original_url).hostname, (err, address, family) => {
-    if(err) {
-      res.json({ error: 'invalid url' })
-    } else {
-      
-        URL.findOne({original_url}, (err,data) => {
-          if(err) return res.status(500).send({msg: err.message});
-          if(data) {
-            return res.json({original_url : data.original_url,short_url: data.short_url})
-          } 
-          const url = new URL({
-            original_url: original_url,
-            short_url: shortid.generate()
-          });
-          url.save((err, data) => {
-            if (err) return res.status(500).send({ msg: err.message });
-            res.json({ original_url: url.original_url, short_url: url.short_url });
-          });
-        })
-    }
-  });
+  console.log(req.body)
+  if (validUrl.isUri(url)) {
+    URL.findOne({original_url}, (err,data) => {
+      if(err) return res.status(500).send({msg: err.message});
+      if(data) {
+        return res.json({original_url : data.original_url,short_url: data.short_url})
+      } 
+      const url = new URL({
+        original_url: original_url,
+        short_url: shortid.generate()
+      });
+      url.save((err, data) => {
+        if (err) return res.status(500).send({ msg: err.message });
+        res.json({ original_url: url.original_url, short_url: url.short_url });
+      });
+    })
+  }
+  else {
+    res.json({ error: 'invalid url' })
+  }
 });
 
 app.listen(port, function() {
