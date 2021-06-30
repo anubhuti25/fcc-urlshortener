@@ -39,7 +39,7 @@ app.get('/api/shorturl/:short_url', (req, res) => {
     if(data) {
       return res.redirect(data.original_url)
     } else {
-      res.status(404).json({ error: 'No URL found' })
+      res.status(404).json({ error: 'invalid url' })
     }
   });
 });
@@ -47,9 +47,10 @@ app.get('/api/shorturl/:short_url', (req, res) => {
 // Your first API endpoint
 app.post('/api/shorturl', function(req, res) {
   const original_url = req.body.url;
+  console.error(req.body)
   dns.lookup(url.parse(original_url).hostname, (err, address, family) => {
     if(err) {
-      res.json({ error: 'Invalid URL' })
+      res.json({ error: 'invalid url' })
     } else {
       
         URL.findOne({original_url}, (err,data) => {
