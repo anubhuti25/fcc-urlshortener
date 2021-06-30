@@ -49,7 +49,7 @@ app.post('/api/shorturl', function(req, res) {
   const original_url = req.body.url;
   dns.lookup(url.parse(original_url).hostname, (err, address, family) => {
     if(err) {
-      res.json({ error: 'invalid url' })
+      res.json({ error: 'Invalid URL' })
     } else {
       
         URL.findOne({original_url}, (err,data) => {
