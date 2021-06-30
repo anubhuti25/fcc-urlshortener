@@ -49,7 +49,7 @@ app.get('/api/shorturl/:short_url', (req, res) => {
 app.post('/api/shorturl', function(req, res) {
   const original_url = req.body.url;
   console.log(req.body)
-  if (validUrl.isUri(url)) {
+  if (validUrl.isWebUri(original_url)) {
     URL.findOne({original_url}, (err,data) => {
       if(err) return res.status(500).send({msg: err.message});
       if(data) {
